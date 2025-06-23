@@ -39,32 +39,28 @@ function handleCellEdit() {
 	let colName = td.data('col');
 	let value = td.text().trim();
 
-	const saved = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
+	// Ignora campos vazios (nem tenta salvar)
+	if (!value) return;
 
-
-	if (saved[colName] === value || saved[colName] == '') { // nada mudou, não precisa salvar de novo
-		return;
-	} else {
-		if (isDateField(colName)) {
-			// Evita criar múltiplos inputs se já estiver editando
-			if (!td.find('input').length) {
-				createDateInput(td, value, rowIndex, colName, tr);
-			}
-			return; // Evita salvar o valor antes da validação
+	// Campo do tipo data? Deixa o fluxo para `createDateInput` (que trata por input/blur próprio)
+	if (isDateField(colName)) {
+		// evita duplicar o input
+		if (!td.find('input').length) {
+			createDateInput(td, value, rowIndex, colName, tr);
 		}
-		// Para outros campos, salva normalmente
-		saveToSession(rowIndex, colName, value);
-		checkAndSubmitRow(tr, rowIndex);
+		return;
 	}
 
+	const saved = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
 
-	//if (isDateField(colName)) return; // datas já são tratadas no input.blur
-	console.log("Value", value.typeOf);
+	// Ignora se não houve alteração no valor
+	if (saved[colName] === value) return;
 
-
-
-
+	// Salva se valor foi alterado
+	saveToSession(rowIndex, colName, value);
+	checkAndSubmitRow(tr, rowIndex);
 }
+
 
 // ---------------------------------------------
 // Verifica se o campo é do tipo data
