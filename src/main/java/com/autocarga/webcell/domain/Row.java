@@ -45,6 +45,11 @@ public class Row {
 		this.dtfim = dtfim;
 	}
 
+	
+
+	public String getId() {
+		return id;
+	}
 
 	public String getNumlinha() {
 		return numlinha;
