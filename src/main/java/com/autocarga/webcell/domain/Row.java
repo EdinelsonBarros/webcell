@@ -1,5 +1,5 @@
 package com.autocarga.webcell.domain;
-import java.sql.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +17,7 @@ public class Row {
 	public String numlinha, numfunc, numvinc, nome, cpf,  
 	cargo, codigo_atividade, setor, ch_arq, disciplina, aih, arquivo;
 	
-	public Date dtini, dtfim;	
+	public LocalDate dtini, dtfim;	
 	
 	public Row() {
 		super();
@@ -27,7 +27,7 @@ public class Row {
 
 	public Row(String numlinha, String numfunc, String numvinc, String nome, String cpf, String cargo,
 			String codigo_atividade, String setor, String ch_arq, String disciplina, String aih, String arquivo,
-			Date dtini, Date dtfim) {
+			LocalDate dtini, LocalDate dtfim) {
 		super();
 		this.numlinha = numlinha;
 		this.numfunc = numfunc;
@@ -142,19 +142,19 @@ public class Row {
 		this.arquivo = arquivo;
 	}
 
-	public Date getDtini() {
+	public LocalDate getDtini() {
 		return dtini;
 	}
 
-	public void setDtini(Date dtini) {
+	public void setDtini(LocalDate dtini) {
 		this.dtini = dtini;
 	}
 
-	public Date getDtfim() {
+	public LocalDate getDtfim() {
 		return dtfim;
 	}
 
-	public void setDtfim(Date dtfim) {
+	public void setDtfim(LocalDate dtfim) {
 		this.dtfim = dtfim;
 	}
 	
