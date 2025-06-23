@@ -1,6 +1,33 @@
 $(document).ready(function() {
-	$('#mytable').on('input customInput', 'td[contenteditable=true]', handleCellEdit);
+
+	restoreTableFromSession();
+
+	$('#mytable').on('blur', 'td[contenteditable=true]', handleCellEdit);
 });
+
+
+// recupera os dados do sessionStorage quando a página é recarregada
+function restoreTableFromSession() {
+	Object.keys(sessionStorage).forEach(key => {
+		if (key.startsWith('linha_')) {
+			const rowIndex = parseInt(key.split('_')[1], 10);
+			const rowData = JSON.parse(sessionStorage.getItem(key));
+
+			const tr = $('#mytable tbody tr').eq(rowIndex);
+			if (!tr.length) return; // se a linha não existir, pula
+
+			tr.find('td[contenteditable=true]').each(function() {
+				const td = $(this);
+				const colName = td.data('col');
+				if (rowData[colName]) {
+					td.text(rowData[colName]);
+				}
+			});
+		}
+	});
+}
+
+
 
 // ---------------------------------------------
 // Função principal que trata a edição da célula
@@ -12,19 +39,31 @@ function handleCellEdit() {
 	let colName = td.data('col');
 	let value = td.text().trim();
 
-	console.log('Edição capturada');
+	const saved = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
 
-	if (isDateField(colName)) {
-		// Evita criar múltiplos inputs se já estiver editando
-		if (!td.find('input').length) {
-			createDateInput(td, value, rowIndex, colName, tr);
+
+	if (saved[colName] === value || saved[colName] == '') { // nada mudou, não precisa salvar de novo
+		return;
+	} else {
+		if (isDateField(colName)) {
+			// Evita criar múltiplos inputs se já estiver editando
+			if (!td.find('input').length) {
+				createDateInput(td, value, rowIndex, colName, tr);
+			}
+			return; // Evita salvar o valor antes da validação
 		}
-		return; // Evita salvar o valor antes da validação
+		// Para outros campos, salva normalmente
+		saveToSession(rowIndex, colName, value);
+		checkAndSubmitRow(tr, rowIndex);
 	}
 
-	// Para outros campos, salva normalmente
-	saveToSession(rowIndex, colName, value);
-	checkAndSubmitRow(tr, rowIndex);
+
+	//if (isDateField(colName)) return; // datas já são tratadas no input.blur
+	console.log("Value", value.typeOf);
+
+
+
+
 }
 
 // ---------------------------------------------
@@ -97,8 +136,21 @@ function handleDateValidation(input, td, rowIndex, colName, tr) {
 // ---------------------------------------------
 function saveToSession(rowIndex, colName, value) {
 	let rowData = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
-	rowData[colName] = value;
-	sessionStorage.setItem('linha_' + rowIndex, JSON.stringify(rowData));
+
+	if (value === '') {
+		delete rowData[colName];
+	} else {
+		rowData[colName] = value;
+	}
+
+	// Só salva no sessionStorage se houver pelo menos um campo preenchido
+	if (Object.keys(rowData).length > 0) {
+		sessionStorage.setItem('linha_' + rowIndex, JSON.stringify(rowData));
+	} else {
+		sessionStorage.removeItem('linha_' + rowIndex); // remove a linha se estiver toda vazia
+	}
+
+	//rowData[colName] = value;
 }
 
 // ---------------------------------------------
@@ -108,13 +160,17 @@ function checkAndSubmitRow(tr, rowIndex) {
 	let rowData = JSON.parse(sessionStorage.getItem('linha_' + rowIndex));
 	if (!rowData) return;
 
-	let totalCols = tr.find('td').length; // ajuste se a última célula não for editável
-	let filledCols = Object.values(rowData).filter(v => v !== '').length;
+	rowData.status = 'saving'; // Adiciona o status na linha para salvando
+	rowData.id = ' '; // adiciona o campo id para receber para futuras alterações no banco
+
+	let totalCols = tr.find('td[contenteditable=true]').length; // ajuste se a última célula não for editável
+	let filledCols = Object.values(rowData).filter(v => v !== '').length - 2; // -2 é para excluir da contagem o valor do status
 
 	console.log('Total cols:', totalCols);
 	console.log('Filled cols:', filledCols);
+	console.log(rowData)
 
-	if (filledCols === (totalCols - 1)) {
+	if (filledCols === totalCols) {
 		console.log("Linha completa");
 
 		console.log(rowData)
@@ -128,11 +184,16 @@ function checkAndSubmitRow(tr, rowIndex) {
 			data: JSON.stringify(rowData),
 			success: function(response) {
 				alert('Linha salva com sucesso!');
-				sessionStorage.removeItem('linha_' + rowIndex);
-				tr.find('td').attr('contenteditable', 'false');
+				rowData.status = 'saved'; // Adiciona o status na linha para salvo
+				//sessionStorage.removeItem('linha_' + rowIndex);
+				console.log(rowData)
+				console.log(response)
+				//tr.find('td').attr('contenteditable', 'false');
 			},
 			error: function() {
+				rowData.status = 'saveErro'; // Adiciona o status na linha erro ao salvar
 				alert('Erro ao salvar a linha!');
+				console.log(rowData)
 			}
 		});
 	}

@@ -3,14 +3,12 @@ package com.autocarga.webcell.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.autocarga.webcell.domain.Row;
+import com.autocarga.webcell.domain.RowDTO;
 import com.autocarga.webcell.service.RowService;
 
 
@@ -26,11 +24,16 @@ public class RowController {
 	}
 	
 	@PostMapping("/rowSave")
-	public ResponseEntity<String> addRows(@RequestBody Row rowRequest) {
+	public ResponseEntity<Row> addRows(@RequestBody RowDTO rowDTO) {
 
-		return ResponseEntity.ok(rowService.saveRow(rowRequest));
+		return rowService.saveRow(rowDTO);
 
 	}
 
+	
+	public ResponseEntity<String> updateRow(@RequestBody Row row){
+		
+		return ResponseEntity.ok("");
+	}
 
 }
