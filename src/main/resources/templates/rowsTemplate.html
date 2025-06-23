@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<HTML xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link th:href="@{/css/main.css}" rel="stylesheet">
+	<title>Home</title>
+</head>
+
+<style>
+	#containerMesage {
+		display: flex;
+		justify-content: center;
+
+	}
+
+	#containerMesage {
+		font-size: 1.3rem;
+		color: red;
+
+	}
+</style>
+
+<body>
+	<header>
+	
+	</header>
+	<div id="containerMesage">
+		<span id="invalidDate"></span>
+	</div>
+
+	<main>
+
+		<form class="container-table">
+			<div class="scroll-wrapper"></div>
+			<table id="mytable">
+				<thead>
+					<tr>
+						<th scope="col">NUMLINHA</th>
+						<th scope="col">NUMFUNC</th>
+						<th scope="col">NUMVINC</th>
+						<th scope="col">NOME</th>
+						<th scope="col">CPF</th>
+						<th scope="col">DTINI</th>
+						<th scope="col">DTFIM</th>
+						<th scope="col">CARGO</th>
+						<th scope="col" style="width: 150px;">CODIGO_ATIVIDADE</th>
+						<th scope="col">SETOR</th>
+						<th scope="col">CH_ARQ</th>
+						<th scope="col">DISCIPLINA</th>
+						<th scope="col">AIH</th>
+						<th scope="col">ARQUIVO</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="i : ${#numbers.sequence(1, 100)}">
+						<td th:text="${i}" contenteditable="false" class="editavel" data-col="numlinha"></td>
+						<td contenteditable="true" class="editavel" data-col="numfunc"></td>
+						<td contenteditable="true" class="editavel" data-col="numvic"></td>
+						<td contenteditable="true" class="editavel" data-col="nome"></td>
+						<td contenteditable="true" class="editavel" data-col="cpf"></td>
+						<td contenteditable="true" class="editavel" data-col="dtini"></td>
+						<td contenteditable="true" class="editavel" data-col="dtfim"></td>
+						<td contenteditable="true" class="editavel" data-col="cargo"></td>
+						<td contenteditable="true" class="editavel" data-col="codigo_atividade"></td>
+						<td contenteditable="true" class="editavel" data-col="setor"></td>
+						<td contenteditable="true" class="editavel" data-col="ch_arq"></td>
+						<td contenteditable="true" class="editavel" data-col="disciplina"></td>
+						<td contenteditable="true" class="editavel" data-col="aih"></td>
+						<td contenteditable="true" class="editavel" data-col="arquivo"></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</main>
+	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+	<script th:src="@{/js/jquery.mask.min.js}"></script>
+	<script th:src="@{/js/main.js}"></script>
+
+</body>
+
+
+
+
+
+</HTML>
