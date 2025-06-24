@@ -49,7 +49,9 @@ public ResponseEntity<Row> saveRow(RowDTO rowDTO) {
 	
 	public String updateRow(Row r) {
 		Optional<Row>  rowUpdate = rowRepository.findById(r.getId());
-		// continuar a fazer método do update
+		if(rowUpdate.isPresent()) {
+			
+		}
 		
 		return "";
 	}
