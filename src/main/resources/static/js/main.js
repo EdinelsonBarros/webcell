@@ -39,26 +39,40 @@ function handleCellEdit() {
 	let colName = td.data('col');
 	let value = td.text().trim();
 
-	// Ignora campos vazios (nem tenta salvar)
-	if (!value) return;
+	const saved = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
+		
 
-	// Campo do tipo data? Deixa o fluxo para `createDateInput` (que trata por input/blur próprio)
-	if (isDateField(colName)) {
-		// evita duplicar o input
-		if (!td.find('input').length) {
-			createDateInput(td, value, rowIndex, colName, tr);
+		if (saved[colName] === value || saved[colName] == '') { // nada mudou, não precisa salvar de novo
+			return;
+		} else {
+			if (isDateField(colName)) {
+				// Evita criar múltiplos inputs se já estiver editando
+				if (!td.find('input').length) {
+					createDateInput(td, value, rowIndex, colName, tr);
+				}
+				return; // Evita salvar o valor antes da validação
+			}
+			// Para outros campos, salva normalmente
+			saveToSession(rowIndex, colName, value);
+			checkAndSubmitRow(tr, rowIndex);
 		}
-		return;
+
 	}
 
-	const saved = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
 
-	// Ignora se não houve alteração no valor
-	if (saved[colName] === value) return;
+function saveRowOrCell(tr, rowIndex, value){
+	let status = tr.data('status');
+	if(status == 'wait' || status == 'saveErro'){ 
+		checkAndSubmitRow(tr, rowIndex);
+	} else if (status == 'saved'){
+		/*
+			Mudar lódiga ?
+			Ao inves de trabalhar com estado
+			verificar se há id presente, se houver id 
+			a linha ja foi registrada no banco.
+		*/
+	}
 
-	// Salva se valor foi alterado
-	saveToSession(rowIndex, colName, value);
-	checkAndSubmitRow(tr, rowIndex);
 }
 
 
@@ -149,18 +163,35 @@ function saveToSession(rowIndex, colName, value) {
 	//rowData[colName] = value;
 }
 
+function updateCell(cellValue){
+	
+	$.ajax({
+			url: '/updateCell',
+			type: 'PATCH',
+			contentType: 'application/json',
+			data: JSON.stringify(cellValue),
+			success: function(response) {
+				alert('Linha salva com sucesso!');
+				tr.attr('data-status', 'updated')
+			},
+			error: function() {
+				tr.attr('data-status', 'updateError')
+				alert('Erro ao salvar a linha!');
+			}
+		});
+}
+
 // ---------------------------------------------
 // Verifica se linha está completa e envia via AJAX
 // ---------------------------------------------
 function checkAndSubmitRow(tr, rowIndex) {
 	let rowData = JSON.parse(sessionStorage.getItem('linha_' + rowIndex));
 	if (!rowData) return;
-
-	rowData.status = 'saving'; // Adiciona o status na linha para salvando
-	rowData.id = ' '; // adiciona o campo id para receber para futuras alterações no banco
+	
+	rowData.id = null; // adiciona o campo id para receber para futuras alterações no banco
 
 	let totalCols = tr.find('td[contenteditable=true]').length; // ajuste se a última célula não for editável
-	let filledCols = Object.values(rowData).filter(v => v !== '').length - 2; // -2 é para excluir da contagem o valor do status
+	let filledCols = Object.values(rowData).filter(v => v !== '').length - 1; // -1 exclui da contagem o valor do id
 
 	console.log('Total cols:', totalCols);
 	console.log('Filled cols:', filledCols);
@@ -180,16 +211,14 @@ function checkAndSubmitRow(tr, rowIndex) {
 			data: JSON.stringify(rowData),
 			success: function(response) {
 				alert('Linha salva com sucesso!');
-				rowData.status = 'saved'; // Adiciona o status na linha para salvo
-				//sessionStorage.removeItem('linha_' + rowIndex);
+				tr.attr('data-status', 'saved')
 				console.log(rowData)
 				console.log(response)
 				//tr.find('td').attr('contenteditable', 'false');
 			},
 			error: function() {
-				rowData.status = 'saveErro'; // Adiciona o status na linha erro ao salvar
+				tr.attr('data-status', 'saveErro')
 				alert('Erro ao salvar a linha!');
-				console.log(rowData)
 			}
 		});
 	}

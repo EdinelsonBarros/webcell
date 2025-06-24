@@ -19,7 +19,6 @@
 	#containerMesage {
 		font-size: 1.3rem;
 		color: red;
-
 	}
 </style>
 
@@ -55,7 +54,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr th:each="i : ${#numbers.sequence(1, 100)}">
+					<tr th:each="i : ${#numbers.sequence(1, 100)}" data-status="wait">
 						<td th:text="${i}" contenteditable="false" class="editavel" data-col="numlinha"></td>
 						<td contenteditable="true" class="editavel" data-col="numfunc"></td>
 						<td contenteditable="true" class="editavel" data-col="numvic"></td>

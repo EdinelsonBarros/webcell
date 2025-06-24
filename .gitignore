@@ -32,6 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 
-### Arquivos dos projetos ###
-application.properties
-
+.application.properties
