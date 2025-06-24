@@ -54,7 +54,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr th:each="i : ${#numbers.sequence(1, 100)}" data-status="wait">
+					<tr th:each="i : ${#numbers.sequence(1, 100)}" data-id="">
 						<td th:text="${i}" contenteditable="false" class="editavel" data-col="numlinha"></td>
 						<td contenteditable="true" class="editavel" data-col="numfunc"></td>
 						<td contenteditable="true" class="editavel" data-col="numvic"></td>

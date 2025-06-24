@@ -23,6 +23,10 @@ function restoreTableFromSession() {
 					td.text(rowData[colName]);
 				}
 			});
+			
+			if(rowData.id){
+				tr.attr('data-id', rowData.id);
+			}
 		}
 	});
 }
@@ -38,11 +42,18 @@ function handleCellEdit() {
 	let rowIndex = tr.index();
 	let colName = td.data('col');
 	let value = td.text().trim();
+	
+	if(value == '') return;
 
-	const saved = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
+	const rowData = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
 		
+	if(rowData.id){
+		saveToSession(rowIndex, colName, value)
+		sendPatch(rowIndex, td, colName);
+		return
+	}		
 
-		if (saved[colName] === value || saved[colName] == '') { // nada mudou, não precisa salvar de novo
+		if (rowData[colName] === value) { // nada mudou, não precisa salvar de novo
 			return;
 		} else {
 			if (isDateField(colName)) {
@@ -54,26 +65,11 @@ function handleCellEdit() {
 			}
 			// Para outros campos, salva normalmente
 			saveToSession(rowIndex, colName, value);
-			checkAndSubmitRow(tr, rowIndex);
+			checkAndSubmitRow(tr, rowIndex, colName);
 		}
 
 	}
 
-
-function saveRowOrCell(tr, rowIndex, value){
-	let status = tr.data('status');
-	if(status == 'wait' || status == 'saveErro'){ 
-		checkAndSubmitRow(tr, rowIndex);
-	} else if (status == 'saved'){
-		/*
-			Mudar lódiga ?
-			Ao inves de trabalhar com estado
-			verificar se há id presente, se houver id 
-			a linha ja foi registrada no banco.
-		*/
-	}
-
-}
 
 
 // ---------------------------------------------
@@ -126,6 +122,8 @@ function handleDateValidation(input, td, rowIndex, colName, tr) {
 	td.css({ 'border': '1px solid rgb(160, 160, 160)' });
 	const val = input.val().trim();
 
+	input.remove();
+	
 	if (val === '' || isValidDate(val)) {
 		td.text(val);
 		input.remove();
@@ -160,69 +158,94 @@ function saveToSession(rowIndex, colName, value) {
 		sessionStorage.removeItem('linha_' + rowIndex); // remove a linha se estiver toda vazia
 	}
 
-	//rowData[colName] = value;
+
 }
 
-function updateCell(cellValue){
-	
-	$.ajax({
-			url: '/updateCell',
-			type: 'PATCH',
-			contentType: 'application/json',
-			data: JSON.stringify(cellValue),
-			success: function(response) {
-				alert('Linha salva com sucesso!');
-				tr.attr('data-status', 'updated')
-			},
-			error: function() {
-				tr.attr('data-status', 'updateError')
-				alert('Erro ao salvar a linha!');
-			}
-		});
-}
 
 // ---------------------------------------------
 // Verifica se linha está completa e envia via AJAX
 // ---------------------------------------------
-function checkAndSubmitRow(tr, rowIndex) {
+function checkAndSubmitRow(tr, rowIndex, colName) {
 	let rowData = JSON.parse(sessionStorage.getItem('linha_' + rowIndex));
+	console.log('Verificando ID da linha', rowData.id);
 	if (!rowData) return;
+
+	let totalCols = tr.find('td[contenteditable=true]').length;
+	let filledCols = Object.values(rowData).filter(v => v !== '').length;
+
+	// Verifica se todos os campos obrigatórios foram preenchidos
+	if (filledCols !== totalCols) return;
+	console.log('filledCols:', filledCols);
+	console.log('totalCols:', totalCols);
 	
-	rowData.id = null; // adiciona o campo id para receber para futuras alterações no banco
+	// Substitui '/' por '-' nas datas
+	//Mudar posteriormente, para fazer persistencia com uma variavel que não afete a visualização data.
+	if (rowData.dtini) rowData.dtini = rowData.dtini.replace(/\//g, '-');
+	if (rowData.dtfim) rowData.dtfim = rowData.dtfim.replace(/\//g, '-');
 
-	let totalCols = tr.find('td[contenteditable=true]').length; // ajuste se a última célula não for editável
-	let filledCols = Object.values(rowData).filter(v => v !== '').length - 1; // -1 exclui da contagem o valor do id
-
-	console.log('Total cols:', totalCols);
-	console.log('Filled cols:', filledCols);
-	console.log(rowData)
-
-	if (filledCols === totalCols) {
-		console.log("Linha completa");
-
-		console.log(rowData)
-		rowData.dtini = rowData.dtini.replace(/\//g, '-');
-		rowData.dtfim = rowData.dtfim.replace(/\//g, '-');
-		console.log(rowData)
-		$.ajax({
-			url: '/rowSave',
-			type: 'POST',
-			contentType: 'application/json',
-			data: JSON.stringify(rowData),
-			success: function(response) {
-				alert('Linha salva com sucesso!');
-				tr.attr('data-status', 'saved')
-				console.log(rowData)
-				console.log(response)
-				//tr.find('td').attr('contenteditable', 'false');
-			},
-			error: function() {
-				tr.attr('data-status', 'saveErro')
-				alert('Erro ao salvar a linha!');
-			}
-		});
+	
+	if (rowData.id == undefined) {
+		sendPost(rowData, tr, rowIndex);
+	} else {
+		sendPatch(rowData, tr, rowIndex, colName);
 	}
+
+
 }
+
+function sendPost(rowData, tr, rowIndex) {
+	$.ajax({
+		url: '/rowSave',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify(rowData),
+		success: function(response) {
+			//alert('Nova linha salva!');
+			//tr.attr('data-id', response.id);
+
+			// Se o back-end retornar o ID da nova linha, salve no sessionStorage
+			if (response && response.id) {
+				rowData.id = response.id;
+				sessionStorage.setItem('linha_' + rowIndex, JSON.stringify(rowData));
+				
+			}
+		},
+		error: function() {
+			//alert('Erro ao salvar nova linha.');
+		}
+	});
+}
+
+
+function sendPatch(rowIndex, td, colName) {
+	//pegar o valor atual
+	const rowData = JSON.parse(sessionStorage.getItem('linha_' + rowIndex)) || {};
+	let actualValue = rowData[colName];
+	
+	let cellUpdate = {
+		id: rowData.id,
+		campo: td.data('col'),
+		valor: actualValue
+	};
+	
+	console.log(cellUpdate);
+	$.ajax({
+		url: '/updateCell',
+		type: 'PATCH',
+		contentType: 'application/json',
+		data: JSON.stringify(cellUpdate),
+		success: function() {
+			//alert('Linha atualizada!');
+			
+		},
+		error: function() {
+			//tr.attr('data-status', 'updateError');
+			
+		}
+	});
+
+}
+
 
 // ---------------------------------------------
 // Função utilitária para validar datas no formato dd/mm/yyyy

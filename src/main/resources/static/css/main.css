@@ -1,3 +1,14 @@
+@font-face {
+    font-family: 'IBM';
+    src: url('../fonts/IBMPlexSansJP-Regular.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+*{
+	font-family: 'IMB', sans-serif;
+}
+
 html,
 body {
 	height: 100vh;
@@ -5,28 +16,28 @@ body {
 	text-align: center;
 }
 
-main{
+main {
 	display: flex;
 	justify-content: center;
-	
+
 }
 
-#containerMesage{
+#containerMesage {
 	display: flex;
 	justify-content: center;
-	
+
 }
 
-#invalidDate{
-	
+#invalidDate {
+
 	color: red;
 }
 
-.container-table{
+.container-table {
 	height: 90vh;
-	width: min-content;  
-	max-height: 90vh; 
-	max-width: 90vw; 
+	width: min-content;
+	max-height: 90vh;
+	max-width: 90vw;
 	overflow-y: auto;
 	overflow-x: auto;
 }
@@ -34,7 +45,6 @@ main{
 table {
 	border-collapse: collapse;
 	border: 2px solid rgb(140 140 140);
-	font-family: sans-serif;
 	font-size: 0.8rem;
 	letter-spacing: 1px;
 	min-width: max-content;
@@ -51,44 +61,38 @@ caption {
 
 
 
-th{
+th {
 	background-color: rgb(228 240 245);
 	position: sticky;
 	top: 0;
-	
+	padding: 6px 5px;
 }
 
-th, td{
-	
-	width: 100px;
-}
 
 td {
+	border: 1px solid rgb(160 160 160);
+	padding: 2px 2px;
+	width: 100px;
 	height: 15px;
 }
 
-tbody > tr > td {
+tbody>tr>td {
 	width: 100px;
 	height: 22px;
 }
 
 
 
-input{
+input {
 	height: 100%;
 	width: 100%;
 	border: 0px solid none;
 	border-width: 0px;
 }
 
-thead, tfoot {
+thead,
+tfoot {
 	background-color: rgb(228 240 245);
-}
-
-th,
-td {
-	border: 1px solid rgb(160 160 160);
-	padding: 2px 2px;
 }
 
 .inputDate {
