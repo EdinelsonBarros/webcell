@@ -1,0 +1,32 @@
+Webcell
+
+Aplicação para criações e edição de planilhas.
+
+FUNCIONALIDADES				STATUS
+	1-Logar e autenticar ----------	em espera
+	2-Criar planilha --------------	em desenvolvimento
+	3-Baixar planilha ------------- em espera
+	4-Carregar planilha p/ edição -	em espera
+	5-Editar planilha ------------- em espera
+
+2-CRIAR PLANILHA			
+	A-Desenvolver view - em desenvolvimento
+		a-tabela -------------- OK
+		b-cabeçalho
+		c-barra de funcinalidaes
+	B-Desenvolver validações ------ em desenvolvimento
+		data ------------------ OK
+		caracteres especiais
+		nome
+		cpf
+	C-Desenvolver persistência no DB
+	
+		
+		
+MÉTODO PACTH NÃO ESTÁ FUNCIONANDO
+QUANDO ALTERAR UM CAMPO ELE ACUSA DTINI MAIOR QUE DTFIM
+O PROBLEMA ESTÁ NO METODO handleDateValidation()
+	Pois ele pega o valor do input para validação, quando o ojeto ja foi pessitido
+	não há valor no input para pegar
+
+VERIFICAR COMO MANTER A SINCRONIZAÇÃO DO BANCO DE DADOS COM SESSION STORAGE

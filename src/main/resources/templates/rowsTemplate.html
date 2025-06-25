@@ -37,7 +37,7 @@
 			<table id="mytable">
 				<thead>
 					<tr>
-						<th scope="col">NUMLINHA</th>
+						<th scope="col" class="numlinha">Nº</th>
 						<th scope="col">NUMFUNC</th>
 						<th scope="col">NUMVINC</th>
 						<th scope="col">NOME</th>
@@ -55,7 +55,9 @@
 				</thead>
 				<tbody>
 					<tr th:each="i : ${#numbers.sequence(1, 100)}" data-id="">
-						<td th:text="${i}" contenteditable="false" class="editavel" data-col="numlinha"></td>
+						<td th:text="${i}" contenteditable="false" class="editavel" data-col="numlinha">
+							<input type="text">
+						</td>
 						<td contenteditable="true" class="editavel" data-col="numfunc"></td>
 						<td contenteditable="true" class="editavel" data-col="numvic"></td>
 						<td contenteditable="true" class="editavel" data-col="nome"></td>
